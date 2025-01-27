@@ -56,6 +56,14 @@ const isPhaseDisabled = () => {
     !useAppConfigStore().phaseActivationList[Phase[selectedPhase.value] as unknown as Phase]
   );
 };
+
+const isPriorPhaseSubmitted = () => {
+  return (
+      false
+      //!isPhaseDisabled() && selectedPhase.value == Phase.Phase0 //&&
+      //Git Hub Repository has a submission
+  );
+};
 </script>
 
 <template>
@@ -75,6 +83,11 @@ const isPhaseDisabled = () => {
         <span id="submissionClosedWarning">Submissions to this phase are currently disabled</span>
       </div>
 
+      <div v-if="isPriorPhaseSubmitted()">
+        <br />
+        <span id="noPriorPhase">You have not submitted the prior phase yet</span>
+      </div>
+
       <div id="submitDialog">
         <select v-model="selectedPhase" @change="useSubmissionStore().checkGrading()">
           <option :value="null" selected disabled>Select a phase</option>
@@ -89,7 +102,7 @@ const isPhaseDisabled = () => {
         </select>
         <button
           :disabled="
-            selectedPhase === null || isPhaseDisabled() || useSubmissionStore().currentlyGrading
+            selectedPhase === null || isPhaseDisabled() || isPriorPhaseSubmitted() || useSubmissionStore().currentlyGrading
           "
           class="primary"
           @click="submitSelectedPhase"
