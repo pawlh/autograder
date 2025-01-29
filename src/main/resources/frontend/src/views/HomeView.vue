@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
-import { useSubmissionStore } from "@/stores/submissions";
-import { Phase, type Submission } from "@/types/types";
-import { uiConfig } from "@/stores/uiConfig";
-import { submissionPost } from "@/services/submissionService";
+import {onMounted, ref} from "vue";
+import {useSubmissionStore} from "@/stores/submissions";
+import {Phase, type Submission} from "@/types/types";
+import {uiConfig} from "@/stores/uiConfig";
+import {submissionPost} from "@/services/submissionService";
 import LiveStatus from "@/views/StudentView/LiveStatus.vue";
 import SubmissionHistory from "@/views/StudentView/SubmissionHistory.vue";
 import InfoPanel from "@/components/InfoPanel.vue";
 import ResultsPreview from "@/views/StudentView/ResultsPreview.vue";
-import { useAppConfigStore } from "@/stores/appConfig";
+import {useAppConfigStore} from "@/stores/appConfig";
 import ShutdownWarning from "@/components/ShutdownWarning.vue";
 
 // periodically check if grading is happening
@@ -59,7 +59,8 @@ const isPhaseDisabled = () => {
 
 const getPriorPhase = () => {
   const assignmentOrder = [Phase.GitHub, Phase.Phase0, Phase.Phase1, Phase.Phase3, Phase.Phase4, Phase.Phase5, Phase.Phase6];
-  if (selectedPhase.value == null || selectedPhase.value == Phase.Quality || selectedPhase.value == Phase.GitHub) return null
+  if (selectedPhase.value == null || selectedPhase.value == Phase.GitHub) return null
+  else if (selectedPhase.value == Phase.Quality) return Phase.GitHub
   return assignmentOrder[assignmentOrder.indexOf(selectedPhase.value) -1]
 }
 
