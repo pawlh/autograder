@@ -69,24 +69,26 @@ onUnmounted(() => {
   <PopUp v-if="activated" @closePopUp="deactivate">
     <div id="box">
       <h1>About the CS 240 Autograder</h1>
-      <AboutPagePerson
-        name="Paul Hathaway"
-        :lead="true"
-        title="Father of the Autograder"
-        url="https://github.com/pawlh"
-        tenure="Sept 2022-Apr 2024"
-        contributions="Wrote the foundations of the Autograder and its core grading functionality"
-        fa-icon="fa-solid fa-otter"
-      />
-      <AboutPagePerson
-        name="Michael Davenport"
-        :lead="true"
-        title="Guardian of the Autograder"
-        url="https://github.com/19mdavenport"
-        tenure="Jan 2023-Apr 2025"
-        contributions="Developed most of the integrations with Canvas, student database handling, the code quality checker, lots of behind the scenes refactoring, and basically had a hand in every backend system in the program"
-        fa-icon="fa-solid fa-hat-wizard"
-      />
+      <div id="leads">
+        <AboutPagePerson
+          name="Paul Hathaway"
+          :lead="true"
+          title="Father of the Autograder"
+          url="https://github.com/pawlh"
+          tenure="Sept 2022-Apr 2024"
+          contributions="Wrote the foundations of the Autograder and its core grading functionality"
+          fa-icon="fa-solid fa-otter"
+        />
+        <AboutPagePerson
+          name="Michael Davenport"
+          :lead="true"
+          title="Guardian of the Autograder"
+          url="https://github.com/19mdavenport"
+          tenure="Jan 2023-Apr 2025"
+          contributions="Developed most of the integrations with Canvas, student database handling, the code quality checker, lots of behind the scenes refactoring, and basically had a hand in every backend system in the program"
+          fa-icon="fa-solid fa-hat-wizard"
+        />
+      </div>
 
       <br />
 
@@ -95,21 +97,21 @@ onUnmounted(() => {
           name="Dallin Webecke"
           url="https://github.com/webecke"
           tenure="Jan 2024-Apr 2025"
-          contributions="Created several admin tools, cleaned up the Student UI and added Font Awesome"
+          contributions="Created several admin tools, cleaned up the Student UI, built a config system, and added Font Awesome"
           fa-icon="fa-solid fa-tree"
         />
         <AboutPagePerson
           name="James Finlinson"
           url="https://github.com/frozenfrank"
-          tenure="Jan 2024-Dec 2025"
+          tenure="Jan 2024-Apr 2025"
           contributions="Developed class-requirement enforcement systems, like late-days and git-commits"
           fa-icon="fa-solid fa-jedi"
         />
         <AboutPagePerson
           name="Than Gerlek"
           url="https://github.com/ThanGerlek"
-          tenure="Jan 2024-Apr 2026"
-          contributions="He's new to the team, but he's doing a lot"
+          tenure="Jan 2024-Dec 2024"
+          contributions="Refactored many backend systems to follow best programming principles"
           fa-icon="fa-solid fa-not-equal"
         />
         <AboutPagePerson
@@ -125,6 +127,27 @@ onUnmounted(() => {
           tenure="Jan 2024-Aug 2024"
           contributions="Wrote some systems that did pre-compiling verification of student code"
           fa-icon="fa-solid fa-face-grin-squint-tears"
+        />
+        <AboutPagePerson
+          name="Gavin Hunter"
+          url="https://github.com/gprim"
+          tenure="Sep 2024-Dec 2025"
+          contributions="Introduced Prettier to the frontend development cycle"
+          fa-icon="fa-solid fa-shield-cat"
+        />
+        <AboutPagePerson
+          name="David Higueros"
+          url="https://github.com/TheDavSmasher"
+          tenure="Sep 2024-Dec 2025"
+          contributions="Helped clean up some backend code"
+          fa-icon="fa-solid fa-dragon"
+        />
+        <AboutPagePerson
+          name="Melvin Whitaker"
+          url="https://github.com/Maillman"
+          tenure="Sep 2024-Dec 2025"
+          contributions="Helped clean up some backend code"
+          fa-icon="fa-solid fa-envelope"
         />
         <!--
         New Autograder Developers!
@@ -155,9 +178,15 @@ onUnmounted(() => {
   text-wrap: balance;
 }
 
-#team {
+#leads {
   display: grid;
   grid-template-columns: 1fr 1fr;
+}
+
+#team {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  column-gap: 2px;
 }
 
 #box {

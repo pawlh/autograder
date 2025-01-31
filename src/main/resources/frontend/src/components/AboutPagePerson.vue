@@ -74,5 +74,6 @@ defineProps({
 
 i {
   color: #0047ba;
+  display: inline-block;
 }
 </style>
