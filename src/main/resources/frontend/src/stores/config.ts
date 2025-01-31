@@ -45,6 +45,8 @@ export type PrivateConfig = {
     assignmentId: number;
     rubricItems: Map<RubricType, RubricInfo>;
   }[];
+
+  holidays: Date[];
 };
 
 // @ts-ignore
@@ -76,6 +78,7 @@ export const useConfigStore = defineStore("config", () => {
     },
     courseNumber: -1,
     assignments: [],
+    holidays: [],
   });
 
   const updateConfig = async () => {

@@ -52,6 +52,7 @@ class ServerTest {
                 Arguments.of("POST", "/api/admin/config/penalties", "updatePenalties"),
                 Arguments.of("POST", "/api/admin/config/phases", "updateLivePhases"),
                 Arguments.of("POST", "/api/admin/config/phases/shutdown", "scheduleShutdown"),
+                Arguments.of("POST", "/api/admin/config/holidays", "updateHolidays"),
 
                 Arguments.of( "GET", "/api/admin/submissions/active", "submissionsActiveGet"),
                 Arguments.of("POST", "/api/admin/submissions/approve", "approveSubmissionPost"),

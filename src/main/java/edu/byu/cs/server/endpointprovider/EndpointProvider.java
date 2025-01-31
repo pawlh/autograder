@@ -42,6 +42,7 @@ public interface EndpointProvider {
     Route updateCourseIdPost();
     Route reloadCourseAssignmentIds();
     Route updatePenalties();
+    Route updateHolidays();
 
     // SubmissionController
 

@@ -13,16 +13,10 @@ import edu.byu.cs.util.PhaseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static edu.byu.cs.util.PhaseUtils.isPhaseEnabled;
@@ -65,7 +59,8 @@ public class ConfigService {
         return new PrivateConfig(
                 generatePenaltyConfig(),
                 dao.getConfiguration(Configuration.COURSE_NUMBER, Integer.class),
-                generateAssignmentsConfig()
+                generateAssignmentsConfig(),
+                generateHolidayConfig()
         );
     }
 
@@ -108,18 +103,6 @@ public class ConfigService {
         );
     }
 
-    //
-    // CONFIG SETTERS
-    //
-    private static void clearBannerConfig() throws DataAccessException {
-        dao.setConfiguration(Configuration.BANNER_MESSAGE, "", String.class);
-        dao.setConfiguration(Configuration.BANNER_LINK, "", String.class);
-        dao.setConfiguration(Configuration.BANNER_COLOR, "", String.class);
-        dao.setConfiguration(Configuration.BANNER_EXPIRATION, Instant.MAX, Instant.class);
-
-        logAutomaticConfigChange("Banner message has expired");
-    }
-
     public static ArrayList<PrivateConfig.AssignmentConfig> generateAssignmentsConfig() throws DataAccessException {
         ArrayList<PrivateConfig.AssignmentConfig> assignments = new ArrayList<>();
         for (Phase phase : Phase.values()) {
@@ -131,6 +114,27 @@ public class ConfigService {
             assignments.add(new PrivateConfig.AssignmentConfig(phase, assignmentId, rubricConfigItems));
         }
         return assignments;
+    }
+
+    public static String[] generateHolidayConfig() throws DataAccessException {
+        String encodedDates = dao.getConfiguration(Configuration.HOLIDAY_LIST, String.class);
+
+        if (Objects.equals(encodedDates, "")) {
+            return new String[0];
+        }
+        return encodedDates.split(";");
+    }
+
+    //
+    // CONFIG SETTERS
+    //
+    private static void clearBannerConfig() throws DataAccessException {
+        dao.setConfiguration(Configuration.BANNER_MESSAGE, "", String.class);
+        dao.setConfiguration(Configuration.BANNER_LINK, "", String.class);
+        dao.setConfiguration(Configuration.BANNER_COLOR, "", String.class);
+        dao.setConfiguration(Configuration.BANNER_EXPIRATION, Instant.MAX, Instant.class);
+
+        logAutomaticConfigChange("Banner message has expired");
     }
 
     public static void updateLivePhases(ArrayList phasesArray, User user) throws DataAccessException {
@@ -271,6 +275,20 @@ public class ConfigService {
         setConfigItem(user, Configuration.LINES_PER_COMMIT_REQUIRED, request.linesChangedPerCommit(), Integer.class);
     }
 
+    public static void updateHolidays(User user, List<LocalDate> holidays) throws DataAccessException {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        holidays.sort(LocalDate::compareTo);
+
+        for (LocalDate holiday : holidays) {
+            stringBuilder.append(holiday).append(";");
+        }
+
+        String encodedHolidays = stringBuilder.toString();
+
+        setConfigItem(user, Configuration.HOLIDAY_LIST, encodedHolidays, String.class);
+    }
+
     //
     // GENERAL HELPER FUNCTIONS
     //
@@ -334,7 +352,7 @@ public class ConfigService {
         if (current.equals(value)) return;
 
         dao.setConfiguration(configKey, value, type);
-        logConfigChange("changed %s to %s".formatted(configKey.name(), value.toString()), admin.netId());
+        logConfigChange("changed %s to [%s]".formatted(configKey.name(), value.toString()), admin.netId());
     }
 
 

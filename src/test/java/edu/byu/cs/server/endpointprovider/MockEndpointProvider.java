@@ -160,6 +160,11 @@ public class MockEndpointProvider implements EndpointProvider {
     }
 
     @Override
+    public Route updateHolidays() {
+        return (req, res) -> extractRequestInfo("updateHolidays", req, res);
+    }
+
+    @Override
     public Route submitPost() {
         return (req, res) -> extractRequestInfo("submitPost", req, res);
     }

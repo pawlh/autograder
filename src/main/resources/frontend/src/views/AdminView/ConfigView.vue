@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { defineAsyncComponent, onMounted } from "vue";
-import { listOfPhases, Phase } from "@/types/types";
+import { listOfPhases } from "@/types/types";
 import { useConfigStore } from "@/stores/config";
-import { generateClickableLink, readableTimestamp } from "@/utils/utils";
+import { generateClickableLink, readableTimestamp, simpleDate } from "@/utils/utils";
 import ConfigSection from "@/components/config/ConfigSection.vue";
+import { isLastDateWithinXDays } from "@/utils/utils";
 
 // Lazy Load Editor Components
+const HolidayConfigEditor = defineAsyncComponent(
+  () => import("@/components/config/HolidayConfigEditor.vue"),
+);
 const BannerConfigEditor = defineAsyncComponent(
   () => import("@/components/config/BannerConfigEditor.vue"),
 );
@@ -23,6 +27,12 @@ const ScheduleShutdownEditor = defineAsyncComponent(
 );
 
 const config = useConfigStore();
+
+const holidayWarning = (): boolean => {
+  if (config.admin.holidays.length == 0) return true;
+
+  return isLastDateWithinXDays([...config.admin.holidays], 30);
+};
 
 onMounted(async () => {
   await useConfigStore().updateConfig();
@@ -97,6 +107,26 @@ onMounted(async () => {
         <p v-if="config.public.shutdown.timestamp != 'never'">
           <span class="infoLabel">Warning duration: </span>
           {{ config.public.shutdown.warningMilliseconds / (60 * 60 * 1000) }} hours
+        </p>
+      </template>
+    </ConfigSection>
+
+    <ConfigSection
+      title="Holidays"
+      description="Days the Autograder should not count towards the late penalty"
+    >
+      <template #editor="{ closeEditor }">
+        <HolidayConfigEditor :closeEditor="closeEditor" />
+      </template>
+      <template #current>
+        <div v-if="holidayWarning()">
+          <b style="background-color: red; color: white; border-radius: 5px; padding: 5px"
+            >Holidays are about to run out!</b
+          >
+          <p><em>Please add more holidays prompty, using the University Academic Calendar.</em></p>
+        </div>
+        <p v-for="holiday in config.admin.holidays">
+          {{ simpleDate(holiday) }}
         </p>
       </template>
     </ConfigSection>

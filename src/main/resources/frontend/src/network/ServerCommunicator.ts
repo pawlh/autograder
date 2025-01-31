@@ -177,9 +177,7 @@ async function doRequest<T>(
   bodyObject: Object | null = null,
   expectResponse: boolean = true,
 ): Promise<T | null> {
-  console.log("doRequest", method, bodyObject, expectResponse);
   const response = await doUnprocessedRequest(method, endpoint, bodyObject);
-  console.log("response", response);
 
   if (!expectResponse) {
     return null;
