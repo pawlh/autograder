@@ -49,9 +49,6 @@ public class DefaultGitVerificationStrategy implements CommitVerificationStrateg
                 new CV(
                         commitsByDay.commitsBackdated(),
                         "Suspicious commit history. Some commits have been backdated."),
-                new CV(
-                        commitsByDay.missingTailHash(),
-                        "Missing tail hash. The previous submission commit could not be found in the repository."),
         };
         CV[] warningConditions = {
                 new CV(
@@ -65,8 +62,11 @@ public class DefaultGitVerificationStrategy implements CommitVerificationStrateg
                         commitsByDay.getErroringCommitsSet("commitTimestampsDuplicatedSubsequentOnly"),
                         "Mistaken history manipulation. Multiple commits have the exact same timestamp. Likely, commits were pushed and amended and merged together."),
                 new CV(
-                        commitsByDay.commitsInPast(),
-                        "Some commits excluded. Commits authored before the previous phase hash were not counted."),
+                        commitsByDay.missingTailHash(),
+                        "Missing tail hash. The previous submission commit could not be found in the repository."),
+                new CV(
+                        commitsByDay.commitsInPast() && !commitsByDay.missingTailHash(),
+                        "Some commits excluded. Commits authored before the previous phase submission were not counted."),
         };
 
         // Preserve the first set of messages (preserve the original warnings about amending commits)

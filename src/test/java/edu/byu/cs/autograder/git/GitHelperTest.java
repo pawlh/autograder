@@ -258,23 +258,25 @@ class GitHelperTest {
     @Test
     void passoffMissingTailHash() {
         utils.setGradingContext(utils.generateGradingContext(1, 1, 10,  1));
+        Collection<String> submissionWarnings = List.of("Missing tail hash", "Additional warning");
         utils.evaluateTest("missing-tail-commit", List.of(
                 new VerificationCheckpoint(
                     repoContext -> {
-                        utils.makeCommit(repoContext, "Change 1", 24, 39, 20);
+                        utils.makeCommit(repoContext, "Change 1", 1, 9, 20);
                     },
                     utils.generalCommitVerificationResult(true, 1, 1)),
                 new VerificationCheckpoint(
                     repoContext -> {
-                        utils.makeCommit(repoContext, "Change 2", 23, 38, 10);
+                        utils.makeCommit(repoContext, "Change 2", 0, 3, 10);
 
                         // NOTE: I tried putting in an *obviously* incorrect head hash for testing, but it JGit rejected
                         // it with an InvalidObjectIdException. Apparently the ObjectIds cannot be any alphanumeric string.
                         utils.setPrevSubmissionHeadHash("f6fbf36bd4f932177df1bc70fbd5a32da288c6d7"); // Commit doesn't exist
+                        utils.setPrevSubmissionTimestamp(Instant.now().minus(Duration.ofMinutes(30))); // Submitted between the two phases
                     },
-                    // Since the tail hash doesn't exist, it will evaluate the entire repository resulting in 2 commits on two days.
-                    // It will be flagged as potentially incorrect and require manual intervention.
-                    utils.generalCommitVerificationResult(false, 2, 2, true))
+                    // Since the tail hash doesn't exist, it will evaluate the entire repository.
+                    // Only the commits since the last pass-off are counted, and the submission will not be blocked.
+                    utils.generalCommitVerificationResult(true, 1, 1, 1, true, submissionWarnings))
         ));
     }
 
