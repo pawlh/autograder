@@ -1,9 +1,7 @@
 package edu.byu.cs.server.endpointprovider;
 
-import spark.Filter;
-import spark.Request;
-import spark.Response;
-import spark.Route;
+import io.javalin.http.Handler;
+import io.javalin.http.Context;
 
 import java.util.Map;
 
@@ -22,7 +20,7 @@ public class MockEndpointProvider implements EndpointProvider {
      * methods only run once on Server startup, so they can't be used
      * for that purpose.
      *
-     * @param endpointName the name of the Route that was called
+     * @param endpointName the name of the Handler that was called
      */
     public void runHandler(String endpointName) {}
 
@@ -31,14 +29,14 @@ public class MockEndpointProvider implements EndpointProvider {
      * that is called. It is designed for use with Mockito.verify() to verify
      * that endpoints are called with specific path parameters.
      *
-     * @param endpointName the name of the Route that was called
+     * @param endpointName the name of the Handler that was called
      * @param paramName    the name of the parameter
      * @param paramValue   the value of the parameter
      */
     public void hasPathParam(String endpointName, String paramName, String paramValue) {}
 
-    private Object extractRequestInfo(String endpointName, Request req, Response res) {
-        Map<String, String> params = req.params();
+    private Object extractRequestInfo(String endpointName, Context ctx) {
+        Map<String, String> params = ctx.pathParamMap();
         for (String paramName : params.keySet()) {
             String paramValue = params.get(paramName);
             this.hasPathParam(endpointName, paramName, paramValue);
@@ -50,177 +48,182 @@ public class MockEndpointProvider implements EndpointProvider {
     }
 
     @Override
-    public Filter beforeAll() {
-        return (req, res) -> extractRequestInfo("beforeAll", req, res);
+    public Handler beforeAll() {
+        return (ctx) -> extractRequestInfo("beforeAll", ctx);
     }
 
     @Override
-    public Filter afterAll() {
-        return (req, res) -> extractRequestInfo("afterAll", req, res);
+    public Handler afterAll() {
+        return (ctx) -> extractRequestInfo("afterAll", ctx);
     }
 
     @Override
-    public Route defaultGet() {
-        return (req, res) -> extractRequestInfo("defaultGet", req, res);
+    public Handler defaultGet() {
+        return (ctx) -> extractRequestInfo("defaultGet", ctx);
     }
 
     @Override
-    public Route usersGet() {
-        return (req, res) -> extractRequestInfo("usersGet", req, res);
+    public Handler defaultOptions() {
+        return (ctx) -> extractRequestInfo("defaultOptions", ctx);
     }
 
     @Override
-    public Route testModeGet() {
-        return (req, res) -> extractRequestInfo("testModeGet", req, res);
+    public Handler usersGet() {
+        return (ctx) -> extractRequestInfo("usersGet", ctx);
     }
 
     @Override
-    public Route commitAnalyticsGet() {
-        return (req, res) -> extractRequestInfo("commitAnalyticsGet", req, res);
+    public Handler testModeGet() {
+        return (ctx) -> extractRequestInfo("testModeGet", ctx);
     }
 
     @Override
-    public Route honorCheckerZipGet() {
-        return (req, res) -> extractRequestInfo("honorCheckerZipGet", req, res);
+    public Handler commitAnalyticsGet() {
+        return (ctx) -> extractRequestInfo("commitAnalyticsGet", ctx);
     }
 
     @Override
-    public Route sectionsGet() {
-        return (req, res) -> extractRequestInfo("sectionsGet", req, res);
+    public Handler honorCheckerZipGet() {
+        return (ctx) -> extractRequestInfo("honorCheckerZipGet", ctx);
     }
 
     @Override
-    public Filter verifyAuthenticatedMiddleware() {
-        return (req, res) -> extractRequestInfo("verifyAuthenticatedMiddleware", req, res);
+    public Handler sectionsGet() {
+        return (ctx) -> extractRequestInfo("sectionsGet", ctx);
     }
 
     @Override
-    public Filter verifyAdminMiddleware() {
-        return (req, res) -> extractRequestInfo("verifyAdminMiddleware", req, res);
+    public Handler verifyAuthenticatedMiddleware() {
+        return (ctx) -> extractRequestInfo("verifyAuthenticatedMiddleware", ctx);
     }
 
     @Override
-    public Route meGet() {
-        return (req, res) -> extractRequestInfo("meGet", req, res);
+    public Handler verifyAdminMiddleware() {
+        return (ctx) -> extractRequestInfo("verifyAdminMiddleware", ctx);
     }
 
     @Override
-    public Route callbackGet() {
-        return (req, res) -> extractRequestInfo("callbackGet", req, res);
+    public Handler meGet() {
+        return (ctx) -> extractRequestInfo("meGet", ctx);
     }
 
     @Override
-    public Route loginGet() {
-        return (req, res) -> extractRequestInfo("loginGet", req, res);
+    public Handler callbackGet() {
+        return (ctx) -> extractRequestInfo("callbackGet", ctx);
     }
 
     @Override
-    public Route logoutPost() {
-        return (req, res) -> extractRequestInfo("logoutPost", req, res);
+    public Handler loginGet() {
+        return (ctx) -> extractRequestInfo("loginGet", ctx);
     }
 
     @Override
-    public Route getConfigAdmin() {
-        return (req, res) -> extractRequestInfo("getConfigAdmin", req, res);
+    public Handler logoutPost() {
+        return (ctx) -> extractRequestInfo("logoutPost", ctx);
     }
 
     @Override
-    public Route getConfigStudent() {
-        return (req, res) -> extractRequestInfo("getConfigStudent", req, res);
+    public Handler getConfigAdmin() {
+        return (ctx) -> extractRequestInfo("getConfigAdmin", ctx);
     }
 
     @Override
-    public Route updateLivePhases() {
-        return (req, res) -> extractRequestInfo("updateLivePhases", req, res);
+    public Handler getConfigStudent() {
+        return (ctx) -> extractRequestInfo("getConfigStudent", ctx);
     }
 
     @Override
-    public Route scheduleShutdown() {
-        return (req, res) -> extractRequestInfo("scheduleShutdown", req, res);
+    public Handler updateLivePhases() {
+        return (ctx) -> extractRequestInfo("updateLivePhases", ctx);
     }
 
     @Override
-    public Route updateBannerMessage() {
-        return (req, res) -> extractRequestInfo("updateBannerMessage", req, res);
+    public Handler scheduleShutdown() {
+        return (ctx) -> extractRequestInfo("scheduleShutdown", ctx);
     }
 
     @Override
-    public Route updateCourseIdPost() {
-        return (req, res) -> extractRequestInfo("updateCourseIdPost", req, res);
+    public Handler updateBannerMessage() {
+        return (ctx) -> extractRequestInfo("updateBannerMessage", ctx);
     }
 
     @Override
-    public Route reloadCourseAssignmentIds() {
-        return (req, res) -> extractRequestInfo("reloadCourseAssignmentIds", req, res);
+    public Handler updateCourseIdPost() {
+        return (ctx) -> extractRequestInfo("updateCourseIdPost", ctx);
     }
 
     @Override
-    public Route updatePenalties() {
-        return (req, res) -> extractRequestInfo("updatePenalties", req, res);
+    public Handler reloadCourseAssignmentIds() {
+        return (ctx) -> extractRequestInfo("reloadCourseAssignmentIds", ctx);
     }
 
     @Override
-    public Route submitPost() {
-        return (req, res) -> extractRequestInfo("submitPost", req, res);
+    public Handler updatePenalties() {
+        return (ctx) -> extractRequestInfo("updatePenalties", ctx);
     }
 
     @Override
-    public Route adminRepoSubmitPost() {
-        return (req, res) -> extractRequestInfo("adminRepoSubmitPost", req, res);
+    public Handler submitPost() {
+        return (ctx) -> extractRequestInfo("submitPost", ctx);
     }
 
     @Override
-    public Route submitGet() {
-        return (req, res) -> extractRequestInfo("submitGet", req, res);
+    public Handler adminRepoSubmitPost() {
+        return (ctx) -> extractRequestInfo("adminRepoSubmitPost", ctx);
     }
 
     @Override
-    public Route latestSubmissionForMeGet() {
-        return (req, res) -> extractRequestInfo("latestSubmissionForMeGet", req, res);
+    public Handler submitGet() {
+        return (ctx) -> extractRequestInfo("submitGet", ctx);
     }
 
     @Override
-    public Route submissionXGet() {
-        return (req, res) -> extractRequestInfo("submissionXGet", req, res);
+    public Handler latestSubmissionForMeGet() {
+        return (ctx) -> extractRequestInfo("latestSubmissionForMeGet", ctx);
     }
 
     @Override
-    public Route latestSubmissionsGet() {
-        return (req, res) -> extractRequestInfo("latestSubmissionsGet", req, res);
+    public Handler submissionXGet() {
+        return (ctx) -> extractRequestInfo("submissionXGet", ctx);
     }
 
     @Override
-    public Route submissionsActiveGet() {
-        return (req, res) -> extractRequestInfo("submissionsActiveGet", req, res);
+    public Handler latestSubmissionsGet() {
+        return (ctx) -> extractRequestInfo("latestSubmissionsGet", ctx);
     }
 
     @Override
-    public Route studentSubmissionsGet() {
-        return (req, res) -> extractRequestInfo("studentSubmissionsGet", req, res);
+    public Handler submissionsActiveGet() {
+        return (ctx) -> extractRequestInfo("submissionsActiveGet", ctx);
     }
 
     @Override
-    public Route approveSubmissionPost() {
-        return (req, res) -> extractRequestInfo("approveSubmissionPost", req, res);
+    public Handler studentSubmissionsGet() {
+        return (ctx) -> extractRequestInfo("studentSubmissionsGet", ctx);
     }
 
     @Override
-    public Route submissionsReRunPost() {
-        return (req, res) -> extractRequestInfo("submissionsReRunPost", req, res);
+    public Handler approveSubmissionPost() {
+        return (ctx) -> extractRequestInfo("approveSubmissionPost", ctx);
     }
 
     @Override
-    public Route setRepoUrl() {
-        return (req, res) -> extractRequestInfo("setRepoUrl", req, res);
+    public Handler submissionsReRunPost() {
+        return (ctx) -> extractRequestInfo("submissionsReRunPost", ctx);
     }
 
     @Override
-    public Route setRepoUrlAdmin() {
-        return (req, res) -> extractRequestInfo("setRepoUrlAdmin", req, res);
+    public Handler setRepoUrl() {
+        return (ctx) -> extractRequestInfo("setRepoUrl", ctx);
     }
 
     @Override
-    public Route repoHistoryAdminGet() {
-        return (req, res) -> extractRequestInfo("repoHistoryAdminGet", req, res);
+    public Handler setRepoUrlAdmin() {
+        return (ctx) -> extractRequestInfo("setRepoUrlAdmin", ctx);
+    }
+
+    @Override
+    public Handler repoHistoryAdminGet() {
+        return (ctx) -> extractRequestInfo("repoHistoryAdminGet", ctx);
     }
 }

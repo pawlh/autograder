@@ -21,12 +21,12 @@ class ServerTest {
 
     public static Stream<Arguments> getPathParamEndpoints() {
         return Stream.of(
-                Arguments.of( "GET", "/api/submission", "submissionXGet", ":phase"),
-                Arguments.of( "GET", "/api/admin/analytics/commit", "commitAnalyticsGet", ":option"),
-                Arguments.of("POST", "/api/admin/repo", "setRepoUrlAdmin", ":netid"),
-                Arguments.of( "GET", "/api/admin/honorChecker/zip", "honorCheckerZipGet", ":section"),
-                Arguments.of( "GET", "/api/admin/submissions/latest", "latestSubmissionsGet", ":count"),
-                Arguments.of( "GET", "/api/admin/submissions/student", "studentSubmissionsGet", ":netid")
+                Arguments.of( "GET", "/api/submission", "submissionXGet", "phase"),
+                Arguments.of( "GET", "/api/admin/analytics/commit", "commitAnalyticsGet", "option"),
+                Arguments.of("POST", "/api/admin/repo", "setRepoUrlAdmin", "netId"),
+                Arguments.of( "GET", "/api/admin/honorChecker/zip", "honorCheckerZipGet", "section"),
+                Arguments.of( "GET", "/api/admin/submissions/latest", "latestSubmissionsGet", "count"),
+                Arguments.of( "GET", "/api/admin/submissions/student", "studentSubmissionsGet", "netId")
         );
         // api/admin/config/penalties
     }

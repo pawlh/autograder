@@ -4,30 +4,34 @@ import edu.byu.cs.dataAccess.DaoService;
 import edu.byu.cs.dataAccess.DataAccessException;
 import edu.byu.cs.util.JwtUtils;
 import edu.byu.cs.util.Serializer;
-import org.eclipse.jetty.websocket.api.CloseException;
+import io.javalin.websocket.WsErrorContext;
+import io.javalin.websocket.WsMessageContext;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
-import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-@WebSocket
 public class WebSocketController {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketController.class);
 
-    @OnWebSocketError
-    public void onError(Session session, Throwable t) {
-        if (!(t instanceof CloseException))
-            LOGGER.error("WebSocket error: ", t);
+    public static void onError(WsErrorContext ctx) {
+        if (!(ctx.error() instanceof IOException)) {
+            LOGGER.error("WebSocket error: ", ctx.error());
+        }
     }
 
-    @OnWebSocketMessage
-    public void onMessage(Session session, String message) {
-        String netId = authenticateMessage(message);
-        if (netId == null) {
+    public static void onMessage(WsMessageContext ctx) {
+        Session session = ctx.session;
+        String message = ctx.message();
+        String netId;
+        ctx.enableAutomaticPings(20, TimeUnit.SECONDS);
+        try {
+            netId = JwtUtils.validateToken(message);
+        } catch (Exception e) {
+            LOGGER.warn("Exception thrown while validating token: ", e);
             sendError(session, "Invalid token");
             session.close();
             return;
@@ -72,7 +76,7 @@ public class WebSocketController {
      * @return A boolean indicating the result.
      * @throws RuntimeException When a {@link DataAccessException} occurs.
      */
-    private boolean isInQueue(String netId) {
+    private static boolean isInQueue(String netId) {
         try {
             return DaoService.getQueueDao().isAlreadyInQueue(netId);
         } catch (DataAccessException e) {
@@ -86,7 +90,7 @@ public class WebSocketController {
      *
      * @throws RuntimeException When a {@link DataAccessException} occurs.
      */
-    private void updateAllQueueMembers() {
+    private static void updateAllQueueMembers() {
         try {
             TrafficController.broadcastQueueStatus();
         } catch (DataAccessException e) {
@@ -117,12 +121,7 @@ public class WebSocketController {
      * @param message the error message
      */
     public static void sendError(Session session, String message) {
-        send(
-                session,
-                Map.of(
-                        "type", "error",
-                        "message", message
-                ));
+        send(session, Map.of("type", "error", "message", message));
     }
 
 
