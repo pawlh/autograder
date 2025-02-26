@@ -3,7 +3,7 @@ package edu.byu.cs.autograder.test;
 import edu.byu.cs.autograder.GradingContext;
 import edu.byu.cs.autograder.GradingException;
 import edu.byu.cs.model.Rubric;
-import edu.byu.cs.model.TestAnalysis;
+import edu.byu.cs.model.TestOutput;
 import edu.byu.cs.model.TestNode;
 import edu.byu.cs.util.PhaseUtils;
 
@@ -42,10 +42,10 @@ public class PassoffTestGrader extends TestGrader {
     }
 
     @Override
-    protected float getScore(TestAnalysis testAnalysis) {
-        TestNode testResults = testAnalysis.root();
+    protected float getScore(TestOutput testOutput) {
+        TestNode testResults = testOutput.root();
         float totalStandardTests = testResults.getNumTestsFailed() + testResults.getNumTestsPassed();
-        TestNode extraCredit = testAnalysis.extraCredit();
+        TestNode extraCredit = testOutput.extraCredit();
         float totalECTests = extraCredit != null ? extraCredit.getNumTestsPassed() + extraCredit.getNumTestsFailed() : 0f;
 
         if (totalStandardTests == 0) return 0;
@@ -67,8 +67,8 @@ public class PassoffTestGrader extends TestGrader {
     }
 
     @Override
-    protected String getNotes(TestAnalysis testAnalysis) {
-        TestNode testResults = testAnalysis.root();
+    protected String getNotes(TestOutput testOutput) {
+        TestNode testResults = testOutput.root();
         StringBuilder notes = new StringBuilder();
 
         if (testResults == null) return "No tests were run";
@@ -76,7 +76,7 @@ public class PassoffTestGrader extends TestGrader {
         if (testResults.getNumTestsFailed() == 0) notes.append("All required tests passed");
         else notes.append("Some required tests failed");
 
-        Map<String, Float> ecScores = getECScores(testAnalysis.extraCredit());
+        Map<String, Float> ecScores = getECScores(testOutput.extraCredit());
         float extraCreditValue = PhaseUtils.extraCreditValue(gradingContext.phase());
         float totalECPoints = ecScores.values().stream().reduce(0f, (f1, f2) -> (float) (f1 + Math.floor(f2))) * extraCreditValue;
 
@@ -110,5 +110,10 @@ public class PassoffTestGrader extends TestGrader {
         }
 
         return scores;
+    }
+
+    @Override
+    protected Set<String> modulesToCheckCoverage() {
+        return Set.of();
     }
 }

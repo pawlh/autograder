@@ -1,5 +1,6 @@
 import { useAdminStore } from "@/stores/admin";
 import {
+  type CoverageAnalysis,
   Phase,
   type RubricItem,
   type RubricItemResults,
@@ -151,6 +152,37 @@ export const generateResultsHtmlStringFromTestNode = (node: TestNode, indent: st
   }
 
   return result;
+};
+
+const proportionToColor = (proportion: number) => {
+  /*
+  Was having a grand old time with math functions for this.
+  The point is that at 0% coverage it's max red, at 100% coverage it's max green
+      (although 255 green is really bright so 210 for now)
+  At 50% coverage it's 50% green but still about 70% red
+  */
+  const red = 255 * Math.cos((proportion * Math.PI) / 2);
+  const green = 210 * proportion;
+  return `rgb(${red}, ${green}, 0)`;
+};
+
+export const generateCoverageHtmlStringFromCoverage = (coverage: CoverageAnalysis) => {
+  coverage.classAnalyses.sort((a, b) => {
+    if (a.packageName === b.packageName) {
+      return a.className.localeCompare(b.className);
+    }
+    return a.packageName.localeCompare(b.packageName);
+  });
+
+  let out = "<br>Coverage:<br>";
+  for (const classAnalysis of coverage.classAnalyses) {
+    const total = classAnalysis.covered + classAnalysis.missed;
+    if (total > 0) {
+      const coveredProportion = classAnalysis.covered / total;
+      out += `<span style="color: ${proportionToColor(coveredProportion)}">${classAnalysis.packageName}.${classAnalysis.className}: ${classAnalysis.covered} / ${total}</span><br>`;
+    }
+  }
+  return out;
 };
 
 export const phaseString = (phase: Phase | "Quality" | "GitHub") => {

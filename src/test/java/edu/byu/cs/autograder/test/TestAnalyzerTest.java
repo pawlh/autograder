@@ -45,7 +45,7 @@ class TestAnalyzerTest {
                 </testsuite>
                 """;
 
-        TestNode root = new TestAnalyzer().parse(xmlFromString(testsPassingInput), extraCreditTests, null).root();
+        TestNode root = new TestAnalyzer().parse(xmlFromString(testsPassingInput), extraCreditTests).root();
 
         assertTrue(root.getTestName().startsWith("JUnit Jupiter"));
         assertEquals(2, root.getChildren().size());
@@ -96,7 +96,7 @@ class TestAnalyzerTest {
                 </testsuite>
                 """;
 
-        TestNode root = new TestAnalyzer().parse(xmlFromString(testsFailingInput), extraCreditTests, null).root();
+        TestNode root = new TestAnalyzer().parse(xmlFromString(testsFailingInput), extraCreditTests).root();
 
         assertTrue(root.getTestName().startsWith("JUnit Jupiter"));
         assertEquals(2, root.getChildren().size());
@@ -172,7 +172,7 @@ class TestAnalyzerTest {
                 </testsuite>
                 """;
 
-        TestNode root = new TestAnalyzer().parse(xmlFromString(testsPassingInput), extraCreditTests, null).root();
+        TestNode root = new TestAnalyzer().parse(xmlFromString(testsPassingInput), extraCreditTests).root();
 
         assertTrue(root.getTestName().startsWith("JUnit Jupiter"));
         assertEquals(3, root.getChildren().get("piece").getChildren().get("PawnMoveTests").getChildren().size());

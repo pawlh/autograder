@@ -4,15 +4,13 @@ import edu.byu.cs.autograder.GradingContext;
 import edu.byu.cs.autograder.GradingException;
 import edu.byu.cs.dataAccess.DaoService;
 import edu.byu.cs.dataAccess.DataAccessException;
-import edu.byu.cs.model.Rubric;
-import edu.byu.cs.model.RubricConfig;
-import edu.byu.cs.model.TestAnalysis;
-import edu.byu.cs.model.TestNode;
+import edu.byu.cs.model.*;
 import edu.byu.cs.util.PhaseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.Set;
 
 public abstract class TestGrader {
@@ -49,18 +47,18 @@ public abstract class TestGrader {
         compileTests();
         gradingContext.observer().update("Running " + name() + " tests...");
 
-        TestAnalysis results;
+        TestOutput results;
         if (!new File(gradingContext.stagePath(), "tests").exists()) {
-            results = new TestAnalysis(new TestNode(), null, null);
+            results = new TestOutput(new TestNode(), null, new CoverageAnalysis(new HashSet<>()), null);
             TestNode.countTests(results.root());
         } else {
             results = new TestHelper().runJUnitTests(new File(gradingContext.stageRepo(),
                             "/" + module + "/target/" + module + "-test-dependencies.jar"), stageTestsPath,
-                    packagesToTest(), extraCreditTests());
+                    packagesToTest(), extraCreditTests(), modulesToCheckCoverage());
         }
 
         if (results.root() == null) {
-            results = new TestAnalysis(new TestNode(), null, results.error());
+            results = new TestOutput(new TestNode(), null, new CoverageAnalysis(new HashSet<>()), results.error());
             TestNode.countTests(results.root());
             LOGGER.error("{} tests failed to run for {} in phase {}", name(), gradingContext.netId(),
                     PhaseUtils.getPhaseAsString(gradingContext.phase()));
@@ -68,7 +66,7 @@ public abstract class TestGrader {
 
         results.root().setTestName(testName());
         if(results.extraCredit() == null || results.extraCredit().getChildren().isEmpty()) {
-            results = new TestAnalysis(results.root(), null, results.error());
+            results = new TestOutput(results.root(), null, results.coverage(), results.error());
         }
         else {
             results.extraCredit().setTestName("Extra Credit");
@@ -98,10 +96,12 @@ public abstract class TestGrader {
 
     protected abstract String testName();
 
-    protected abstract float getScore(TestAnalysis testResults) throws GradingException;
+    protected abstract float getScore(TestOutput testResults) throws GradingException;
 
-    protected abstract String getNotes(TestAnalysis testResults) throws GradingException;
+    protected abstract String getNotes(TestOutput testResults) throws GradingException;
 
     protected abstract Rubric.RubricType rubricType();
+
+    protected abstract Set<String> modulesToCheckCoverage() throws GradingException;
 
 }

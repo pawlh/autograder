@@ -32,9 +32,21 @@ export type TestNode = {
   numExtraCreditFailed: number;
 };
 
+export type ClassCoverageAnalysis = {
+  className: string;
+  packageName: string;
+  covered: number;
+  missed: number;
+};
+
+export type CoverageAnalysis = {
+  classAnalyses: ClassCoverageAnalysis[];
+};
+
 export type TestResult = {
   root: TestNode;
   extraCredit: TestNode;
+  coverage: CoverageAnalysis;
   error: string;
 };
 

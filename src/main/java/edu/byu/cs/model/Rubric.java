@@ -42,14 +42,14 @@ public record Rubric(
             Float score,
             Float rawScore,
             Integer possiblePoints,
-            TestAnalysis testResults,
+            TestOutput testResults,
             String textResults
     ) {
-        public Results(String notes, Float score, Integer possiblePoints, TestAnalysis testResults, String textResults) {
+        public Results(String notes, Float score, Integer possiblePoints, TestOutput testResults, String textResults) {
             this(notes, score, score, possiblePoints, testResults, textResults);
         }
 
-        public static Results testError(String notes, TestAnalysis testResults) {
+        public static Results testError(String notes, TestOutput testResults) {
             return new Results(notes, 0f, 0, testResults, null);
         }
 

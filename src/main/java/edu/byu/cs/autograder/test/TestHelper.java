@@ -1,8 +1,9 @@
 package edu.byu.cs.autograder.test;
 
 import edu.byu.cs.autograder.GradingException;
+import edu.byu.cs.model.CoverageAnalysis;
 import edu.byu.cs.model.Rubric;
-import edu.byu.cs.model.TestAnalysis;
+import edu.byu.cs.model.TestOutput;
 import edu.byu.cs.util.FileUtils;
 import edu.byu.cs.util.ProcessUtils;
 import org.slf4j.Logger;
@@ -33,12 +34,16 @@ public class TestHelper {
      */
     private static final String junitJupiterApiJarPath;
 
+    private static final String jacocoCliJarPath;
+    private static final String jacocoAgentJarPath;
 
     static {
         Path libsPath = new File("phases", "libs").toPath();
         try {
             standaloneJunitJarPath = new File(libsPath.toFile(), "junit-platform-console-standalone-1.10.1.jar").getCanonicalPath();
             junitJupiterApiJarPath = new File(libsPath.toFile(), "junit-jupiter-api-5.10.1.jar").getCanonicalPath();
+            jacocoCliJarPath = new File(libsPath.toFile(), "jacococli.jar").getCanonicalPath();
+            jacocoAgentJarPath = new File(libsPath.toFile(), "jacocoagent.jar").getCanonicalPath();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -125,28 +130,48 @@ public class TestHelper {
      * @param extraCreditTests A set of extra credit tests. Example: {"ExtraCreditTest1", "ExtraCreditTest2"}
      * @return A TestNode object containing the results of the tests.
      */
-    TestAnalysis runJUnitTests(File uberJar, File compiledTests, Set<String> packagesToTest,
-                               Set<String> extraCreditTests) throws GradingException {
+    TestOutput runJUnitTests(File uberJar, File compiledTests, Set<String> packagesToTest,
+                             Set<String> extraCreditTests, Set<String> coverageModules) throws GradingException {
         // Process cannot handle relative paths or wildcards,
         // so we need to only use absolute paths and find
         // to get the files
 
         String uberJarPath = uberJar.getAbsolutePath();
 
-        List<String> commands = getRunCommands(packagesToTest, uberJarPath);
+        List<String> runCommands = getRunCommands(packagesToTest, uberJarPath);
 
-        ProcessBuilder processBuilder = new ProcessBuilder()
+        ProcessBuilder runProcessBuilder = new ProcessBuilder()
                 .directory(compiledTests)
-                .command(commands);
+                .command(runCommands);
 
         try {
-            ProcessUtils.ProcessOutput processOutput = ProcessUtils.runProcess(processBuilder);
+            ProcessUtils.ProcessOutput processOutput = ProcessUtils.runProcess(runProcessBuilder);
             String error = processOutput.stdErr();
+
+            if(coverageModules != null && !coverageModules.isEmpty()) {
+                List<String> reportCommands = new ArrayList<>(List.of("java", "-jar", jacocoCliJarPath, "report", "jacoco.exec",
+                        "--csv", "test-output/coverage.csv"));
+                for(String module : coverageModules) {
+                    reportCommands.add("--classfiles");
+                    reportCommands.add(uberJar.getParentFile().getParentFile().getParent() +  "/" + module + "/target/classes");
+                }
+
+                ProcessBuilder reportProcessBuilder = new ProcessBuilder()
+                        .command(reportCommands)
+                        .directory(compiledTests);
+
+                ProcessUtils.runProcess(reportProcessBuilder);
+            }
 
             TestAnalyzer testAnalyzer = new TestAnalyzer();
             File testOutputDirectory = new File(compiledTests, "test-output");
             File junitXmlOutput = new File(testOutputDirectory, "TEST-junit-jupiter.xml");
-            return testAnalyzer.parse(junitXmlOutput, extraCreditTests, removeSparkLines(error));
+            File coverageOutput = new File(testOutputDirectory, "coverage.csv");
+
+            CoverageAnalysis coverage = coverageOutput.exists() ? new CoverageAnalyzer().parse(coverageOutput) : null;
+            TestAnalyzer.TestAnalysis testAnalysis = testAnalyzer.parse(junitXmlOutput, extraCreditTests);
+
+            return new TestOutput(testAnalysis.root(), testAnalysis.extraCredit(), coverage, removeSparkLines(error));
         } catch (ProcessUtils.ProcessException e) {
             LOGGER.error("Error running tests", e);
             throw new GradingException("Error running tests", e);
@@ -156,6 +181,7 @@ public class TestHelper {
     private static List<String> getRunCommands(Set<String> packagesToTest, String uberJarPath) {
         List<String> commands = new ArrayList<>();
         commands.add("java");
+        commands.add("-javaagent:" + jacocoAgentJarPath);
         commands.add("-jar");
         commands.add(standaloneJunitJarPath);
         commands.add("execute");

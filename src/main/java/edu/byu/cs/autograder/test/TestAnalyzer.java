@@ -3,7 +3,6 @@ package edu.byu.cs.autograder.test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import edu.byu.cs.autograder.GradingException;
-import edu.byu.cs.model.TestAnalysis;
 import edu.byu.cs.model.TestNode;
 import edu.byu.cs.util.FileUtils;
 
@@ -16,6 +15,8 @@ import java.util.Set;
  */
 public class TestAnalyzer {
 
+    public record TestAnalysis(TestNode root, TestNode extraCredit) {}
+
     /**
      * Parses the output of the JUnit Console Runner
      *
@@ -23,14 +24,14 @@ public class TestAnalyzer {
      * @param extraCreditTests the names of the test files (excluding .java) worth bonus points. This cannot be null, but can be empty
      * @return the root of the test tree
      */
-    public TestAnalysis parse(File junitXmlOutput, Set<String> extraCreditTests, String error) throws GradingException {
+    public TestAnalysis parse(File junitXmlOutput, Set<String> extraCreditTests) throws GradingException {
         TestNode root = new TestNode();
         root.setTestName("JUnit Jupiter");
         TestNode extraCredit = new TestNode();
         extraCredit.setTestName("JUnit Jupiter Extra Credit");
 
         if(!junitXmlOutput.exists()) {
-            return compileAnalysis(root, extraCredit, error);
+            return compileAnalysis(root, extraCredit);
         }
 
         String xml = FileUtils.readStringFromFile(junitXmlOutput);
@@ -78,7 +79,7 @@ public class TestAnalyzer {
             }
         }
 
-        return compileAnalysis(root, extraCredit, error);
+        return compileAnalysis(root, extraCredit);
     }
 
     private TestNode nodeForClass(TestNode base, String name) {
@@ -99,11 +100,11 @@ public class TestAnalyzer {
         else return nodeForClass(node, extra);
     }
 
-    private TestAnalysis compileAnalysis(TestNode root, TestNode extraCredit, String error) {
+    private TestAnalysis compileAnalysis(TestNode root, TestNode extraCredit) {
         TestNode.collapsePackages(root);
         TestNode.countTests(root);
         TestNode.collapsePackages(extraCredit);
         TestNode.countTests(extraCredit);
-        return new TestAnalysis(root, extraCredit, error);
+        return new TestAnalysis(root, extraCredit);
     }
 }

@@ -66,9 +66,9 @@ public class PreviousPhasePassoffTestGrader extends TestGrader {
     }
 
     @Override
-    protected float getScore(TestAnalysis testResults) throws GradingException {
+    protected float getScore(TestOutput testResults) throws GradingException {
         if (testResults.root().getNumTestsFailed() == 0) return 1f;
-        testResults = new TestAnalysis(testResults.root(), null, testResults.error());
+        testResults = new TestOutput(testResults.root(), null, testResults.coverage(), testResults.error());
         StringBuilder errorBuilder = new StringBuilder(ERROR_MESSAGE).append(" \nFailing tests: \n");
         failingTests(testResults.root(), errorBuilder);
         Rubric.Results results = Rubric.Results.testError(errorBuilder.toString(), testResults);
@@ -85,7 +85,7 @@ public class PreviousPhasePassoffTestGrader extends TestGrader {
     }
 
     @Override
-    protected String getNotes(TestAnalysis results) {
+    protected String getNotes(TestOutput results) {
         if (results.root().getNumTestsFailed() == 0) return "All previous tests passed";
         else return ERROR_MESSAGE;
     }
@@ -93,5 +93,10 @@ public class PreviousPhasePassoffTestGrader extends TestGrader {
     @Override
     protected Rubric.RubricType rubricType() {
         return Rubric.RubricType.GRADING_ISSUE;
+    }
+
+    @Override
+    protected Set<String> modulesToCheckCoverage() {
+        return Set.of();
     }
 }
