@@ -10,7 +10,7 @@ export enum Phase {
 }
 
 export const listOfPhases = (): Array<Phase> => {
-  let result = [];
+  const result = [];
   for (const phase in Phase) {
     const isValueProperty = Number(phase) >= 0;
     if (isValueProperty) {

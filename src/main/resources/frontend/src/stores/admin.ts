@@ -15,7 +15,7 @@ export const useAdminStore = defineStore("admin", () => {
 
     // Also store a cache of all the users by their netId
     const byNetId: NetIdToUserMap = {};
-    for (let user of latestUsers) {
+    for (const user of latestUsers) {
       byNetId[user.netId] = user;
     }
     usersByNetId.value = byNetId;
